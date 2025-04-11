@@ -6,58 +6,48 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Comment;
 
-
 class CommentController extends Controller
 {
     public function store(Request $request, $postId)
-{
-    // ✅ التحقق من صحة البيانات
-    $request->validate([
-        'comment' => ['required', 'string', 'min:3'],
-    ]);
+    {
+        $request->validate([
+            'comment' => ['required', 'string', 'min:3'],
+        ]);
 
-    // ✅ إنشاء التعليق
-    Comment::create([
-        'comment' => $request->input('comment'),
-        'user_id' => auth()->id(), // المستخدم المسجل حاليًا
-        'post_id' => $postId, // معرف البوست المستهدف
-    ]);
+        Comment::create([
+            'comment' => $request->input('comment'),
+            'user_id' => auth()->id(),
+            'post_id' => $postId,
+        ]);
 
-    // ✅ إعادة التوجيه لصفحة البوست بعد إضافة التعليق
-    return redirect()->route('posts.show', $postId)->with('success', 'تم إضافة التعليق بنجاح!');
-}
-public function update(Request $request, Comment $comment)
-{
-    // التأكد إن المستخدم هو صاحب التعليق أو لديه صلاحية التعديل
-    if (auth()->id() !== $comment->user_id) {
-        return back()->with('error', 'لا يمكنك تعديل هذا التعليق.');
+        return redirect()->route('posts.show', $postId)->with('success', 'Comment added successfully!');
     }
 
-    // التحقق من صحة البيانات
-    $request->validate([
-        'comment' => ['required', 'min:3'],
-    ]);
+    public function update(Request $request, Comment $comment)
+    {
+        if (auth()->id() !== $comment->user_id) {
+            return back()->with('error', 'You are not allowed to edit this comment.');
+        }
 
-    // تحديث التعليق
-    $comment->update([
-        'comment' => $request->input('comment'),
-    ]);
+        $request->validate([
+            'comment' => ['required', 'min:3'],
+        ]);
 
-    return back()->with('success', 'تم تعديل التعليق بنجاح.');
-}
+        $comment->update([
+            'comment' => $request->input('comment'),
+        ]);
 
-public function destroy(Comment $comment)
-{
-    // التأكد إن المستخدم هو صاحب التعليق أو لديه صلاحية الحذف
-    if (auth()->id() !== $comment->user_id) {
-        return back()->with('error', 'لا يمكنك حذف هذا التعليق.');
+        return back()->with('success', 'Comment updated successfully.');
     }
 
-    // حذف التعليق
-    $comment->delete();
+    public function destroy(Comment $comment)
+    {
+        if (auth()->id() !== $comment->user_id) {
+            return back()->with('error', 'You are not allowed to delete this comment.');
+        }
 
-    return back()->with('success', 'تم حذف التعليق بنجاح.');
-}
+        $comment->delete();
 
-
+        return back()->with('success', 'Comment deleted successfully.');
+    }
 }

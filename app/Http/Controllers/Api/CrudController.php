@@ -5,9 +5,10 @@ use Illuminate\Http\Request;
 
 use App\Models\Post;
 use App\Models\Hashtag;
+
 class CrudController extends Controller
 {
-    // إنشاء بوست جديد
+    // Create a new post
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -18,10 +19,10 @@ class CrudController extends Controller
         $post = Post::create([
             'title' => $data['title'],
             'content' => $data['content'],
-            'user_id' => auth()->id(), // المستخدم من التوكن
+            'user_id' => auth()->id(), // user from token
         ]);
 
-        // استخراج الهاشتاجات
+        // Extract hashtags
         preg_match_all('/#(\w+)/', $data['content'], $matches);
         $hashtags = $matches[1];
 
@@ -35,53 +36,53 @@ class CrudController extends Controller
         }
 
         return response()->json([
-            'message' => 'تم إنشاء البوست بنجاح',
+            'message' => 'Post created successfully',
             'post' => $post
         ], 201);
     }
 
-    // جلب بوستات المستخدم
+    // Get user's posts
     public function index()
     {
         $posts = Post::where('user_id', auth()->id())->get();
 
         if ($posts->isEmpty()) {
             return response()->json([
-                'message' => 'مافيش بوستات ليك حاليًا'
+                'message' => 'You have no posts yet'
             ], 200);
         }
 
         return response()->json([
-            'message' => 'بوستاتك',
+            'message' => 'Your posts',
             'posts' => $posts
         ], 200);
     }
 
-    // جلب بوست معين
+    // Get a specific post
     public function show($id)
     {
         $post = Post::where('user_id', auth()->id())->find($id);
 
         if (!$post) {
             return response()->json([
-                'message' => 'البوست مش موجود أو مش بتاعك'
+                'message' => 'Post not found or not owned by you'
             ], 404);
         }
 
         return response()->json([
-            'message' => 'البوست',
+            'message' => 'Post details',
             'post' => $post
         ], 200);
     }
 
-    // تعديل بوست
+    // Update a post
     public function update(Request $request, $id)
     {
         $post = Post::where('user_id', auth()->id())->find($id);
 
         if (!$post) {
             return response()->json([
-                'message' => 'البوست مش موجود أو مش بتاعك'
+                'message' => 'Post not found or not owned by you'
             ], 404);
         }
 
@@ -109,19 +110,19 @@ class CrudController extends Controller
         }
 
         return response()->json([
-            'message' => 'تم تعديل البوست بنجاح',
+            'message' => 'Post updated successfully',
             'post' => $post
         ], 200);
     }
 
-    // حذف بوست
+    // Delete a post
     public function destroy($id)
     {
         $post = Post::where('user_id', auth()->id())->find($id);
 
         if (!$post) {
             return response()->json([
-                'message' => 'البوست مش موجود أو مش بتاعك'
+                'message' => 'Post not found or not owned by you'
             ], 404);
         }
 
@@ -129,54 +130,57 @@ class CrudController extends Controller
         $post->delete();
 
         return response()->json([
-            'message' => 'تم حذف البوست بنجاح'
+            'message' => 'Post deleted successfully'
         ], 200);
     }
+
+    // Search posts
     public function search(Request $request)
-{
-    $query = $request->input('query');
+    {
+        $query = $request->input('query');
 
-    $posts = Post::where('user_id', auth()->id())
-                 ->where(function ($q) use ($query) {
-                     $q->where('title', 'LIKE', "%$query%")
-                       ->orWhere('content', 'LIKE', "%$query%");
-                 })
-                 ->get();
+        $posts = Post::where('user_id', auth()->id())
+                     ->where(function ($q) use ($query) {
+                         $q->where('title', 'LIKE', "%$query%")
+                           ->orWhere('content', 'LIKE', "%$query%");
+                     })
+                     ->get();
 
-    if ($posts->isEmpty()) {
+        if ($posts->isEmpty()) {
+            return response()->json([
+                'message' => 'No posts matched the search query'
+            ], 200);
+        }
+
         return response()->json([
-            'message' => 'مافيش بوستات متطابقة للبحث ده'
+            'message' => 'Search results',
+            'posts' => $posts
         ], 200);
     }
 
-    return response()->json([
-        'message' => 'نتايج البحث',
-        'posts' => $posts
-    ], 200);
-}
-public function storeComment(Request $request, $postId)
-{
-    $data = $request->validate([
-        'comment' => 'required|string',
-    ]);
+    // Add a comment to a post
+    public function storeComment(Request $request, $postId)
+    {
+        $data = $request->validate([
+            'comment' => 'required|string',
+        ]);
 
-    $post = Post::where('user_id', auth()->id())->find($postId);
+        $post = Post::where('user_id', auth()->id())->find($postId);
 
-    if (!$post) {
+        if (!$post) {
+            return response()->json([
+                'message' => 'Post not found or not owned by you'
+            ], 404);
+        }
+
+        $comment = $post->comments()->create([
+            'comment' => $data['comment'],
+            'user_id' => auth()->id(),
+        ]);
+
         return response()->json([
-            'message' => 'البوست مش موجود أو مش بتاعك'
-        ], 404);
+            'message' => 'Comment added successfully',
+            'comment' => $comment
+        ], 201);
     }
-
-    $comment = $post->comments()->create([
-        'comment' => $data['comment'],
-        'user_id' => auth()->id(),
-    ]);
-
-    return response()->json([
-        'message' => 'تم إضافة التعليق بنجاح',
-        'comment' => $comment
-    ], 201);
-}
-
 }

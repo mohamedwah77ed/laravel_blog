@@ -33,16 +33,16 @@ class AdminAuthController extends Controller
         $user = Auth::guard('admin')->user();
 
         if ($user->is_admin) {
-            $request->session()->regenerate(); // تجديد السيشن لتأمين الاتصال
+            $request->session()->regenerate(); 
 
-            return redirect()->intended(route('admin.index'))->with('success', 'تم تسجيل الدخول بنجاح!');
+            return redirect()->intended(route('admin.index'))->with('success', 'welcom');
         }
 
         Auth::guard('admin')->logout();
-        return back()->withErrors(['email' => 'غير مسموح لك بالدخول كأدمن.']);
+        return back()->withErrors(['email' => ' You are not allowed to enter as an admin']);
     }
 
-    return back()->withErrors(['email' => 'بيانات الدخول غير صحيحة.']);
+    return back()->withErrors(['email' => 'Login data is incorrect']);
 }
 
     public function logout(Request $request)

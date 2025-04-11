@@ -16,7 +16,7 @@ class CrudControllerApi extends Controller
     $posts = Post::where('user_id', auth()->id())->get();
 
     return response()->json([
-        'message' => $posts->count() ? 'بوستاتك' : 'مافيش بوستات ليك حاليًا',
+        'message' => $posts->count() ? 'your posts' : 'You have no posts yet',
         'posts' => $posts
     ], 200);
 }
@@ -31,10 +31,10 @@ class CrudControllerApi extends Controller
         $post = Post::create([
             'title' => $data['title'],
             'content' => $data['content'],
-            'user_id' => auth()->id(), // المستخدم من التوكن
+            'user_id' => auth()->id(), 
         ]);
 
-        // استخراج الهاشتاجات
+        
         preg_match_all('/#(\w+)/', $data['content'], $matches);
         $hashtags = $matches[1];
 
@@ -48,7 +48,7 @@ class CrudControllerApi extends Controller
         }
 
         return response()->json([
-            'message' => 'تم إنشاء البوست بنجاح',
+            'message' => 'create post don',
             'post' => $post
         ], 201);
     }
@@ -58,12 +58,12 @@ class CrudControllerApi extends Controller
 
     if (!$post) {
         return response()->json([
-            'message' => 'البوست غير موجود'
+            'message' => 'post not found'
         ], 404);
     }
 
     return response()->json([
-        'message' => 'تم العثور على البوست',
+        'message' => 'result of search',
         'post' => $post
     ], 200);
 }
@@ -74,7 +74,7 @@ class CrudControllerApi extends Controller
 
         if (!$post) {
             return response()->json([
-                'message' => 'البوست مش موجود أو مش بتاعك'
+                'message' => 'post not found or not for you'
             ], 404);
         }
 
@@ -102,7 +102,7 @@ class CrudControllerApi extends Controller
         }
 
         return response()->json([
-            'message' => 'تم تعديل البوست بنجاح',
+            'message' => 'don updat',
             'post' => $post
         ], 200);
     }
@@ -112,14 +112,14 @@ class CrudControllerApi extends Controller
     
         if (!$post) {
             return response()->json([
-                'message' => 'البوست مش موجود أو مش بتاعك'
+                'message' => 'post not found'
             ], 404);
         }
     
         $post->delete();
     
         return response()->json([
-            'message' => 'تم حذف البوست بنجاح'
+            'message' => 'delet don'
         ], 200);
     }
     
@@ -135,12 +135,12 @@ class CrudControllerApi extends Controller
 
     if ($posts->isEmpty()) {
         return response()->json([
-            'message' => 'مافيش بوستات متطابقة للبحث ده'
+            'message' => ' There are no posts matching this search.'
         ], 200);
     }
 
     return response()->json([
-        'message' => 'نتائج البحث',
+        'message' => 'result',
         'query' => $query,
         'posts' => $posts
     ], 200);
@@ -156,7 +156,7 @@ public function storeComment(Request $request, $postId)
 
     if (!$post) {
         return response()->json([
-            'message' => 'البوست غير موجود'
+            'message' => 'post not found'
         ], 404);
     }
 
@@ -166,26 +166,24 @@ public function storeComment(Request $request, $postId)
     ]);
 
     return response()->json([
-        'message' => 'تم إضافة التعليق بنجاح',
+        'message' => 'add comment don',
         'comment' => $comment
     ], 201);
 }
 public function deleteComment($id)
 {
-    // جلب التعليق بناءً على الـ ID بشرط يكون بتاع المستخدم الحالي
     $comment = Comment::where('id', $id)->where('user_id', auth()->id())->first();
 
-    // لو التعليق مش موجود أو مش بتاع المستخدم
     if (!$comment) {
         return response()->json([
-            'message' => 'التعليق مش موجود أو مش بتاعك'
+            'message' => 'You cannot delete a comment that is not yours'
         ], 404);
     }
 
     $comment->delete();
 
     return response()->json([
-        'message' => 'تم حذف التعليق بنجاح'
+        'message' => 'delet comment don'
     ], 200);
 }
 

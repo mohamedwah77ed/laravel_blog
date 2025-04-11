@@ -10,7 +10,7 @@ class UserProfileController extends Controller
 {
     public function index()
     {
-        $users = User::where('is_admin', false)->get(); // جلب اليوزرز العاديين بس
+        $users = User::where('is_admin', false)->get();  
         return view('admin.users', compact('users'));
 }
 public function edit($id)
@@ -23,13 +23,13 @@ public function update(Request $request, $id)
 {
     $user = User::findOrFail($id);
     $user->update($request->all());
-    return redirect()->route('users.index')->with('success', 'تم تحديث البيانات بنجاح');
+    return redirect()->route('users.index')->with('success', 'Data updated successfully');
 }
 
 public function destroy($id)
 {
     $user = User::findOrFail($id);
     $user->delete();
-    return redirect()->route('users.index')->with('success', 'تم حذف المستخدم بنجاح');
+    return redirect()->route('users.index')->with('success', 'delet don');
 }
 }

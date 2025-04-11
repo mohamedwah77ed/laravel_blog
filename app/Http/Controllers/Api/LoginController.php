@@ -34,7 +34,7 @@ class LoginController extends Controller
         $request->user()->tokens()->delete();
 
         return response()->json([
-            'message' => 'تم تسجيل الخروج بنجاح'
+            'message' => 'logout don'
         ]);
     }
 

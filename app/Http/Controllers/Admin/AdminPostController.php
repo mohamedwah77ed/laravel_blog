@@ -14,7 +14,7 @@ class AdminPostController extends Controller
     public function index()
     {
         $posts = Post::all(); 
-        return view('admin.index', ['posts' => $posts]); // تصحيح المتغير هنا
+        return view('admin.index', ['posts' => $posts]); 
     }
     
     public function edit_post(Post $post)

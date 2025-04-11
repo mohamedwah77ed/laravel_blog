@@ -36,13 +36,11 @@ class EditUserControllerApi extends Controller
      */
     public function update(Request $request)
 {
-    // التحقق من البيانات المدخلة
     $validatedData = $request->validate([
         'name' => 'sometimes|string|max:255',
         'email' => 'sometimes|email|unique:users,email,' . auth()->id(),
     ]);
 
-    // تحديث بيانات المستخدم المصادق عليه
     $user = auth()->user();
     $user->fill($validatedData);
 
